@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Processing System</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #45a049;
+            --background-color: #f4f4f9;
+            --card-background: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-color: #dddddd;
+            --success-color: #dff0d8;
+            --error-color: #f2dede;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .section {
+            background: var(--card-background);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        .upload-container {
+            border: 2px dashed var(--border-color);
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-container:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .upload-label:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .selected-files {
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: var(--background-color);
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        .search-button {
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .document-card {
+            background: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .document-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+        }
+
+        .document-title {
+            margin: 0;
+            font-size: 1.2em;
+        }
+
+        .document-meta {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .document-content {
+            padding: 15px;
+        }
+
+        .data-group {
+            margin-bottom: 15px;
+        }
+
+        .data-label {
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .data-value {
+            color: var(--text-secondary);
+            background-color: var(--background-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .success {
+            background-color: var(--success-color);
+            color: #3c763d;
+        }
+
+        .error {
+            background-color: var(--error-color);
+            color: #a94442;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+        }
+
+        .search-results {
+            margin-top: 20px;
+        }
+
+        .search-result-item {
+            background: var(--card-background);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .documents-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .search-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Document Processing System</h1>
+    </header>
+
+    <main>
+        <!-- File Upload Section -->
+        <section class="section">
+            <h2 class="section-title">Upload Documents</h2>
+            <div class="upload-container">
+                <input type="file" id="form-files" class="file-input" name="files" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple>
+                <label for="form-files" class="upload-label">Choose Files</label>
+                <div class="selected-files" id="selected-files"></div>
+            </div>
+            <button type="button" id="upload-btn" class="upload-label">Upload Selected Files</button>
+            <div id="upload-status"></div>
+        </section>
+
+        <!-- Search Section -->
+        <section class="section">
+            <h2 class="section-title">Search Documents</h2>
+            <div class="search-container">
+                <input type="text" id="search-input" class="search-input" placeholder="Search for any information...">
+                <button type="button" id="search-btn" class="search-button">Search</button>
+            </div>
+            <div id="search-results" class="search-results"></div>
+        </section>
+
+        <!-- Documents Section -->
+        <section class="section">
+            <h2 class="section-title">Processed Documents</h2>
+            <div id="documents-list" class="documents-grid"></div>
+        </section>
+    </main>
+
+    <script>
+        // File selection handling
+        document.getElementById('form-files').addEventListener('change', function(e) {
+            const selectedFiles = document.getElementById('selected-files');
+            selectedFiles.innerHTML = '';
+            
+            Array.from(this.files).forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>${file.name}</span>
+                    <span>${(file.size / 1024).toFixed(2)} KB</span>
+                `;
+                selectedFiles.appendChild(fileItem);
+            });
+        });
+
+        // File Upload Logic
+        document.getElementById("upload-btn").addEventListener("click", async () => {
+            const files = document.getElementById("form-files").files;
+            if (files.length === 0) {
+                alert("Please select files to upload.");
+                return;
+            }
+
+            const formData = new FormData();
+            for (const file of files) {
+                formData.append('files', file);
+            }
+
+            const statusDiv = document.getElementById("upload-status");
+            statusDiv.innerHTML = '<div class="status-message">Uploading files...</div>';
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    let successCount = 0;
+                    let errorCount = 0;
+                    
+                    result.results.forEach(fileResult => {
+                        if (fileResult.status === 'success') {
+                            successCount++;
+                        } else {
+                            errorCount++;
+                        }
+                    });
+
+                    statusDiv.innerHTML = `
+                        <div class="status-message success">
+                            Upload complete! ${successCount} files processed successfully.
+                            ${errorCount > 0 ? `${errorCount} files failed.` : ''}
+                        </div>
+                    `;
+                    
+                    // Clear selected files
+                    document.getElementById('form-files').value = '';
+                    document.getElementById('selected-files').innerHTML = '';
+                    
+                    // Refresh the documents list
+                    loadDocuments();
+                } else {
+                    throw new Error(result.message || 'Upload failed');
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="status-message error">
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        });
+
+        // Load and display documents
+        async function loadDocuments() {
+            const documentsList = document.getElementById("documents-list");
+            documentsList.innerHTML = '<div class="loading">Loading documents...</div>';
+
+            try {
+                const response = await fetch('/documents');
+                const documents = await response.json();
+                
+                documentsList.innerHTML = '';
+                
+                documents.forEach(doc => {
+                    const docElement = document.createElement('div');
+                    docElement.className = 'document-card';
+                    
+                    const extractedData = doc.extracted_data;
+                    const dataGroups = Object.entries(extractedData)
+                        .map(([key, value]) => {
+                            const displayValue = Array.isArray(value) ? value.join(', ') : value;
+                            return `
+                                <div class="data-group">
+                                    <div class="data-label">${key.replace(/_/g, ' ').toUpperCase()}</div>
+                                    <div class="data-value">${displayValue}</div>
+                                </div>
+                            `;
+                        })
+                        .join('');
+                    
+                    docElement.innerHTML = `
+                        <div class="document-header">
+                            <h3 class="document-title">${doc.filename}</h3>
+                        </div>
+                        <div class="document-meta">
+                            Uploaded: ${new Date(doc.upload_date).toLocaleString()}
+                        </div>
+                        <div class="document-content">
+                            ${dataGroups}
+                        </div>
+                    `;
+                    
+                    documentsList.appendChild(docElement);
+                });
+            } catch (error) {
+                documentsList.innerHTML = `
+                    <div class="status-message error">
+                        Error loading documents: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Search Functionality
+        document.getElementById("search-btn").addEventListener("click", async () => {
+            const searchValue = document.getElementById("search-input").value;
+            if (!searchValue.trim()) {
+                alert("Please enter a search term");
+                return;
+            }
+
+            const searchResults = document.getElementById("search-results");
+            searchResults.innerHTML = '<div class="loading">Searching...</div>';
+
+            try {
+                const response = await fetch(`/search?q=${encodeURIComponent(searchValue)}`);
+                const results = await response.json();
+                
+                searchResults.innerHTML = '';
+                
+                if (results.length === 0) {
+                    searchResults.innerHTML = '<div class="status-message">No results found</div>';
+                    return;
+                }
+                
+                results.forEach(result => {
+                    const resultElement = document.createElement('div');
+                    resultElement.className = 'search-result-item';
+                    resultElement.innerHTML = `
+                        <div class="document-header">
+                            <h3 class="document-title">${result.filename}</h3>
+                        </div>
+                        <div class="document-meta">
+                            Uploaded: ${new Date(result.upload_date).toLocaleString()}
+                        </div>
+                        <div class="document-content">
+                            <div class="data-group">
+                                <div class="data-value">${result.match}</div>
+                            </div>
+                        </div>
+                    `;
+                    searchResults.appendChild(resultElement);
+                });
+            } catch (error) {
+                searchResults.innerHTML = `
+                    <div class="status-message error">
+                        Error searching: ${error.message}
+                    </div>
+                `;
+            }
+        });
+
+        // Load documents when page loads
+        loadDocuments();
+    </script>
+</body>
+</html>
